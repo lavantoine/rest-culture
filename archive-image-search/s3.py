@@ -1,5 +1,7 @@
 import boto3
+from boto3.s3.transfer import TransferConfig
 from botocore.client import Config
+from botocore.config import Config
 from botocore.exceptions import ClientError  # <- ajout nécessaire
 import streamlit as st
 from pathlib import Path
@@ -8,6 +10,8 @@ from utils import get_logger
 logger = get_logger(__name__)
 from PIL import Image
 from pprint import pprint
+from time import sleep
+from tqdm import tqdm
 
 
 class S3():
@@ -20,26 +24,38 @@ class S3():
             config=Config(signature_version='s3v4')  # works well with OVH
         )
         self.bucket = 'images-mae'
+        self.config = TransferConfig(
+            max_concurrency=20,  # threads
+            multipart_threshold= int(1024 * 1024 / 2),  # .5 Mo
+            multipart_chunksize= int(1024 * 1024 / 2), 
+        )
+        
+    def __str__(self) -> str:
+        buckets = ', '.join(self.list_buckets())
+        return f'{'-' * 50}\ns3 OVH with buckets: {buckets}\n{'-' * 50}\n'
     
-    def upload_files(self, filespath: list[Path]) -> None:
-        n = len(filespath)
-        text = 'Vérification des photos, merci de patienter...'
-        bar = st.progress(0.0, text)
-        for i, filepath in enumerate(filespath):
-            self.safe_upload_file(filepath)
-            bar.progress(value=float((i+1)/n), text=f'{text} ({i}/{n})')
-        bar.empty()
-
-    
-    def safe_upload_file(self, filepath: Path) -> None:
-        try:
-            if not self.file_exists(filepath.name):
-                self.client.upload_file(filepath, self.bucket, filepath.name)
-                logger.info(f'✅ {filepath.name} uploaded')
+    def upload_file_list(self, sources: list[Path], folder) -> None:
+        existing_keys = set(self.iter_s3_keys(folder))
+        # n = len(sources)
+        # text = 'Vérification des photos, merci de patienter...'
+        # bar = st.progress(0.0, text)
+        
+        for source_path in tqdm(sources):
+            s3_path = Path(folder) / source_path.name
+            if str(s3_path) not in existing_keys:
+                self.upload_file(source_path, s3_path)
+                tqdm.write(f'✅ {s3_path} uploaded.')
             else:
-                logger.info(f'⏭️ {filepath.name} already on bucket, skipping...')
+                tqdm.write(f'⏭️ {s3_path} already on bucket, skipping...')
+                
+        #     bar.progress(value=float((i+1)/n), text=f'{text} ({i}/{n})')
+        # bar.empty()
+    
+    def upload_file(self, source_path: Path, s3_path: Path) -> None:
+        try:
+            self.client.upload_file(source_path, self.bucket, str(s3_path), Config=self.config)
         except Exception as e:
-            logger.error(f'❌ Error while uploading file \"{filepath.name}\": {e}', exc_info=True)
+            logger.error(f'❌ Error while uploading file to \"{s3_path}\": {e}', exc_info=True)
     
     def download_file(self, filename, embeddings=True) -> BytesIO:
         try:
@@ -68,15 +84,45 @@ class S3():
                 else:
                     raise
     
-    def list_buckets(self):
-        return [bucket['Name'] for bucket in self.client.list_buckets()]
-    
-    def get_all_files(self):
-        paginator = self.client.get_paginator('list_objects_v2')
-        page_iterator = paginator.paginate(Bucket=self.bucket)
+    def list_buckets(self) -> list[str]:
+        return [bucket['Name'] for bucket in self.client.list_buckets()['Buckets']]
         
-        all_files = []
+    def get_file_paths(self, folder) -> list[str]:
+        paginator = self.client.get_paginator('list_objects_v2')
+        page_iterator = paginator.paginate(Bucket=self.bucket, Prefix=folder)
+        
+        file_paths = []
+        
         for page in page_iterator:
             if 'Contents' in page:
-                all_files.extend(obj['Key'] for obj in page['Contents'])
-        return all_files
+                file_paths.extend(obj['Key'] for obj in page['Contents'])
+        return file_paths
+    
+    # def delete_folder(self, path: str) -> None:
+    #     """
+    #     Delete folder in OVH Bucket. If path is an empty string, the whole bucket will be erased.
+
+    #     Args:
+    #         path (str): String path of the folder to delete.
+    #     """        
+    #     if not path:
+    #         logger.warning("WIPING ENTIRE BUCKET IN 10 SEC")
+    #         sleep(10)
+            
+    #     paginator = self.client.get_paginator('list_objects_v2')
+    #     for page in paginator.paginate(Bucket=self.bucket, Prefix=path):
+    #         if 'Contents' in page:
+    #             delete_batch = {
+    #                 'Objects': [{'Key': obj['Key']} for obj in page['Contents']]
+    #             }
+    #             self.client.delete_objects(Bucket=self.bucket, Delete=delete_batch)
+    #             batch_list = [o['Key'] for o in page['Contents']]
+    #             print(f"Deletion batch from {batch_list[0]['Key']} to  {batch_list[-1]['Key']}.")
+    
+    def iter_s3_keys(self, prefix):
+        # response = self.client.list_objects_v2(Bucket=self.bucket, Prefix=prefix)
+        
+        paginator = self.client.get_paginator("list_objects_v2")
+        for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
+            for obj in page.get("Contents", []):
+                yield obj['Key']

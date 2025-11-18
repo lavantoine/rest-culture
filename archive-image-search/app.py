@@ -17,10 +17,11 @@ from s3 import S3
 def initialize_chroma(_bucket_client: S3) -> ChromaBase:
     chroma_base = ChromaBase(_bucket_client)
     
-    all_names = _bucket_client.get_all_files()
+    all_names = _bucket_client.get_file_paths('recto')
     all_ids = [generate_id(_) for _ in all_names]
     
     new_names, new_ids = chroma_base.keep_new_only(filespath=all_names, ids=all_ids)
+    print(new_names)
     metadatas = [{"path": str(name), "name": name} for name in new_names]
     
     with st.spinner('Vérification de la base vectorielle, merci de patienter...'):

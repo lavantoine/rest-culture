@@ -1,0 +1,47 @@
+from pathlib import Path
+from s3 import S3
+from tqdm import tqdm
+import shutil
+from chroma_client import ChromaBase
+
+def load_to_s3(root):
+    ...
+
+def encode_to_chroma(root):
+    pass
+
+def synchronise():
+    # if load_to_s3() == 'updated'
+    ...
+
+recto_tree = Path.home() / 'code/m2rs/data/mae/recto_tree'
+recto_dest = Path.home() / 'code/m2rs/data/mae/recto'
+one_img = Path.home() / 'code/m2rs/data/dummy/clair-obscur.jpg'
+
+s3 = S3()
+# s3.upload_file_list([one_img], 'dummy')
+
+# total = 0
+# for _ in s3.iter_s3_keys(''):
+#     total += 1
+
+jpgs = [source_path for source_path in recto_tree.rglob('*.jpg')]
+tifs = [source_path for source_path in recto_tree.rglob('*.tif')]
+source_files = jpgs + tifs
+
+# s3.upload_file_list(source_files, 'recto')
+
+print(f'Total files: {len(source_files)}')
+
+# for source_path in tqdm(source_files):
+#     dest_path = recto_dest / source_path.name
+#     shutil.move(source_path, recto_dest)
+#     tqdm.write(f'Ok: from {source_path} to {dest_path}')
+
+# for obj in recto_tree.rglob('*'):
+#     if obj.is_file():
+#         print(obj)
+
+# 1. Ensure S3 is synchronized with local
+# 2. Encode img from local
+chroma_base = 
