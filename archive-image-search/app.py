@@ -21,7 +21,7 @@ def initialize_chroma() -> ChromaBase:
 
 def main() -> None:
     # Build Streamlit base page
-    st.set_page_config(page_title="Recherche inversée sur des images d'archive")
+    st.set_page_config(page_title="Recherche inversée sur des images d'archive (v 0.2)")
     st.title("Recherche inversée sur des images d'archive")
     st.markdown("Cette application lancée par la M2RS permet d'effectuer une recherche inversée sur le fonds 209SUP (cartons 933 à 1044) du ministère de l'Europe et des Affaires étrangères (**23 391 photographies**).")
     with st.sidebar:
