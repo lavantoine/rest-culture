@@ -10,6 +10,7 @@ import uuid
 from pprint import pprint
 import tempfile
 from PIL import Image
+import io
 from io import BytesIO
 from s3 import S3
 
@@ -22,28 +23,39 @@ def main() -> None:
     # Build Streamlit base page
     st.set_page_config(page_title="Recherche inversée sur des images d'archive")
     st.title("Recherche inversée sur des images d'archive")
-    st.write("Cette application lancée par la M2RS permet d'effectuer une recherche inversée sur un échantillon du fond 209SUP du ministère des Affaires Étrangères (3563 photographies).")
+    st.markdown("Cette application lancée par la M2RS permet d'effectuer une recherche inversée sur le fonds 209SUP (cartons 933 à 1044) du ministère de l'Europe et des Affaires étrangères (**23 391 photographies**).")
     with st.sidebar:
         st.subheader('Accueil')
     
     s3 = S3()
     chroma_base = initialize_chroma()
     
-    uploaded_image = st.file_uploader(label="Merci de déposer une image :", type=["jpg", "jpeg", "png"])
+    uploaded_image = st.file_uploader(label="Merci de déposer une image :", type=["jpg"])
     
     if uploaded_image is not None:
-        image_bytes = uploaded_image.getvalue()
+        img_bytes = uploaded_image.getvalue()
+        img_name = uploaded_image.name
+        img_pil = Image.open(BytesIO(img_bytes)).convert("RGB")
+        
+        buffer = io.BytesIO()
+        try:
+            if '.jpg' in img_name:
+                img_pil.save(buffer, format="JPEG")
+                buffer.seek(0)   
+            s3.upload_from_buffer_to_user(buffer, img_name)
+        except:
+            ...
+        
         _, center, _ = st.columns((1,2,1))
         center.image(
-            image=image_bytes,
+            image=img_bytes,
             caption=uploaded_image.name,
             use_column_width=True
         )
         
-        image_pil = Image.open(BytesIO(image_bytes)).convert("RGB")
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
             img_path = Path(tmp.name)
-            image_pil.save(img_path)
+            img_pil.save(img_path)
         
         st.subheader('Images similaires :')
 

@@ -125,3 +125,14 @@ class S3():
         for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
             for obj in page.get("Contents", []):
                 yield obj['Key']
+                
+    def upload_from_buffer_to_user(self, buffer, file_name) -> None:
+        print('dans fn')
+        print(self.file_exists(f'user/{file_name}'))
+        print(file_name)
+        # self.client.upload_fileobj(
+        #         buffer,
+        #         self.bucket,
+        #         f'user/{file_name}',
+        #         ExtraArgs={"ContentType": "image/jpeg"}
+        # )
