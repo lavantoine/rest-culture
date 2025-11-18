@@ -16,15 +16,15 @@ def get_logger(name=__name__) -> logging.Logger:
 
 logger = get_logger(__name__)
 
-def get_device() -> str:
-    if torch.backends.mps.is_available():
-        device = 'mps'
-    elif torch.cuda.is_available():
-        device = 'cuda'
-    else:
-        device = 'cpu'
-    logger.info(f'Using device: {device}')
-    return device
+# def get_device() -> str:
+#     if torch.backends.mps.is_available():
+#         device = 'mps'
+#     elif torch.cuda.is_available():
+#         device = 'cuda'
+#     else:
+#         device = 'cpu'
+#     logger.info(f'Using device: {device}')
+#     return device
 
 @st.cache_resource
 def get_local_images_path() -> list[Path]:
@@ -45,14 +45,14 @@ def get_local_images_path() -> list[Path]:
     logger.info(f"{len(valid_images)} valid images found\n")
     return valid_images
 
-@st.cache_resource
-def generate_id(path: Path | str) -> str:
-    if isinstance(path, str):
-        filename = path.lower().strip()
-        return hashlib.md5(data=filename.encode("utf-8")).hexdigest()
-    else:
-        filename = path.name.lower().strip()
-        return hashlib.md5(data=filename.encode("utf-8")).hexdigest()
+# @st.cache_resource
+# def generate_id(path: Path | str) -> str:
+#     if isinstance(path, str):
+#         filename = path.lower().strip()
+#         return hashlib.md5(data=filename.encode("utf-8")).hexdigest()
+#     else:
+#         filename = path.name.lower().strip()
+#         return hashlib.md5(data=filename.encode("utf-8")).hexdigest()
 
 def get_lorem():
     return '''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac lorem elit. 

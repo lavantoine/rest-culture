@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time
-from utils import get_local_images_path, generate_id, get_lorem
+from utils import get_local_images_path, get_lorem
 from pathlib import Path
 from chroma_client import ChromaBase
 import torch
@@ -14,31 +14,9 @@ from io import BytesIO
 from s3 import S3
 
 @st.cache_resource
-def initialize_chroma(_bucket_client: S3) -> ChromaBase:
-    chroma_base = ChromaBase(_bucket_client)
-    
-    all_names = _bucket_client.get_file_paths('recto')
-    all_ids = [generate_id(_) for _ in all_names]
-    
-    new_names, new_ids = chroma_base.keep_new_only(filespath=all_names, ids=all_ids)
-    print(new_names)
-    metadatas = [{"path": str(name), "name": name} for name in new_names]
-    
-    with st.spinner('Vérification de la base vectorielle, merci de patienter...'):
-        if new_ids:
-            for i, batch_embeddings in enumerate(chroma_base.compute_embeddings(filespath=new_names)):
-                start = i * 10
-                end = start + len(batch_embeddings)
-                
-                batch_ids = new_ids[start:end]
-                batch_metadatas = metadatas[start:end]
-                
-                chroma_base.add_to_collection(
-                    ids=batch_ids,
-                    embeddings=batch_embeddings,
-                    metadatas=batch_metadatas
-                    )
-        return chroma_base
+def initialize_chroma() -> ChromaBase:
+    chroma_base = ChromaBase()
+    return chroma_base
 
 def main() -> None:
     # Build Streamlit base page
@@ -48,10 +26,8 @@ def main() -> None:
     with st.sidebar:
         st.subheader('Accueil')
     
-    # Instantiate S3
     s3 = S3()
-    
-    chroma_base = initialize_chroma(_bucket_client=s3)
+    chroma_base = initialize_chroma()
     
     uploaded_image = st.file_uploader(label="Merci de déposer une image :", type=["jpg", "jpeg", "png"])
     
@@ -66,26 +42,28 @@ def main() -> None:
         
         image_pil = Image.open(BytesIO(image_bytes)).convert("RGB")
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-            image_path = Path(tmp.name)
-            image_pil.save(image_path)
+            img_path = Path(tmp.name)
+            image_pil.save(img_path)
         
         st.subheader('Images similaires :')
 
-        image_to_query = [image_path]
-        results = chroma_base.query_image(image_to_query=image_to_query, n_results=12)
+        start = time.perf_counter()
+        results = chroma_base.query_image(img_path, n_results=21)
+        end = time.perf_counter()
+        print(f"Query time : {end - start:.6f} sec.")
         
         cols = st.columns(3)
         for i, metadata in enumerate(results['metadatas'][0]):
-            # img_path = metadata['path']
-            filename = metadata['name']
+            file_path = metadata['path']
+            file_name = metadata['name']
             
-            img_bytes = s3.download_file(filename=filename, embeddings=False)
+            img_bytes = s3.download_file(file_path)
             
             with cols[i % 3]:
                 st.image(
                     image=img_bytes,
                     use_column_width=True,
-                    caption=filename
+                    caption=file_name
                     )
 
         st.subheader('Debug :')

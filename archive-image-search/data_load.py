@@ -15,23 +15,21 @@ def synchronise():
     ...
 
 recto_tree = Path.home() / 'code/m2rs/data/mae/recto_tree'
-recto_dest = Path.home() / 'code/m2rs/data/mae/recto'
+recto = Path.home() / 'code/m2rs/data/mae/recto'
 one_img = Path.home() / 'code/m2rs/data/dummy/clair-obscur.jpg'
 
-s3 = S3()
+# s3 = S3()
 # s3.upload_file_list([one_img], 'dummy')
 
 # total = 0
 # for _ in s3.iter_s3_keys(''):
 #     total += 1
 
-jpgs = [source_path for source_path in recto_tree.rglob('*.jpg')]
-tifs = [source_path for source_path in recto_tree.rglob('*.tif')]
-source_files = jpgs + tifs
+
 
 # s3.upload_file_list(source_files, 'recto')
 
-print(f'Total files: {len(source_files)}')
+# print(f'Total files: {len(source_files)}')
 
 # for source_path in tqdm(source_files):
 #     dest_path = recto_dest / source_path.name
@@ -42,6 +40,11 @@ print(f'Total files: {len(source_files)}')
 #     if obj.is_file():
 #         print(obj)
 
+jpgs = [source_path for source_path in recto.rglob('*.jpg')]
+tifs = [source_path for source_path in recto.rglob('*.tif')]
+source_files = jpgs + tifs
+
 # 1. Ensure S3 is synchronized with local
 # 2. Encode img from local
-chroma_base = 
+chroma_base = ChromaBase()
+chroma_base.add_to_collection(source_files, 'recto')

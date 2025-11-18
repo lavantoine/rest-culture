@@ -57,22 +57,21 @@ class S3():
         except Exception as e:
             logger.error(f'❌ Error while uploading file to \"{s3_path}\": {e}', exc_info=True)
     
-    def download_file(self, filename, embeddings=True) -> BytesIO:
+    def download_file(self, file_path: Path) -> BytesIO:
         try:
             file_obj = BytesIO()
-            self.client.download_fileobj(self.bucket, filename, file_obj)
+            self.client.download_fileobj(self.bucket, file_path, file_obj)
             file_obj.seek(0)
-            logger.info(f'⬇️ {filename} accessed')
+            logger.info(f'⬇️ {file_path} accessed')
             return file_obj
         except Exception as e:
-            logger.error(f'❌ Error while retrieving file \"{filename}\": {e}', exc_info=True)
-            if not embeddings:
-                error_img_path = Path(__file__).parent / 'media/404.png'
-                with Image.open(error_img_path) as img:
-                    buffer = BytesIO()
-                    img.save(buffer, format="PNG")  # ou "PNG", selon ton image
-                    buffer.seek(0)  # très important !
-                    return buffer
+            logger.error(f'❌ Error while retrieving file \"{file_path}\": {e}', exc_info=True)
+            error_img_path = Path(__file__).parent / 'media/404.png'
+            with Image.open(error_img_path) as img:
+                buffer = BytesIO()
+                img.save(buffer, format="PNG")
+                buffer.seek(0)
+                return buffer
     
     def file_exists(self, filename):
         try:
