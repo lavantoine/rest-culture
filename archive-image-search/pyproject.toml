@@ -11,8 +11,8 @@ dependencies = [
     "s3fs>=2025.9.0",
     "st-files-connection>=0.1.0",
     "standard-imghdr>=3.13.0",
-    "streamlit>=1.22.0",
-    "torch>=2.9.0",
+    "streamlit>=1.51.0",
+    "torch>=2.9.1",
     "tqdm>=4.67.1",
     "transformers>=4.57.1",
 ]

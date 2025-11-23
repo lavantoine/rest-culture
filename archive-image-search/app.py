@@ -50,7 +50,7 @@ def main() -> None:
         center.image(
             image=img_bytes,
             caption=uploaded_image.name,
-            use_column_width=True
+            use_container_width=True
         )
         
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
@@ -74,7 +74,7 @@ def main() -> None:
             with cols[i % 3]:
                 st.image(
                     image=img_bytes,
-                    use_column_width=True,
+                    use_container_width=True,
                     caption=file_name
                     )
 
