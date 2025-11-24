@@ -1,12 +1,12 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
+# import pandas as pd
+# import numpy as np
 import time
-from utils import get_local_images_path, get_lorem
+# from utils import get_local_images_path, get_lorem
 from pathlib import Path
 from chroma_client import ChromaBase
-import torch
-import uuid
+# import torch
+# import uuid
 from pprint import pprint
 import tempfile
 from PIL import Image
@@ -41,7 +41,7 @@ def main() -> None:
     
     if uploaded_image is not None:
         img_bytes = uploaded_image.getvalue()
-        img_name = uploaded_image.namee
+        img_name = uploaded_image.name
         img_pil = Image.open(BytesIO(img_bytes)).convert("RGB")
         
         buffer = io.BytesIO()
