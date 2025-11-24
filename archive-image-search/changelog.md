@@ -12,12 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ajout du système de pages multiples.
 - Ajout d'icônes Material Symbols (section pages & onglet de l'application).
 - Ajout de la page Nouveautés.
+- Ajout du score directement sous les résultats.
 
 ### Changement
 
 - Mise à jour de la bibliothèque de construction d'interface Streamlit (1.22 -> 1.51).
 - Mise à jour de toutes les autres bibliothèques du projet.
 - Correction d'un oubli qui empêchait la sauvegarde des photographies déposées par l'utilisateur.
+  
+### Suppression
+
+- Section Debug sous les résultats.
 
 ## [0.2.0] - 2025-11-19
 

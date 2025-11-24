@@ -63,9 +63,10 @@ def main() -> None:
         print(f"Query time : {end - start:.6f} sec.")
         
         cols = st.columns(3)
-        for i, metadata in enumerate(results['metadatas'][0]):
+        for i, (metadata, distance) in enumerate(zip(results['metadatas'][0], (results)['distances'][0])):
             file_path = metadata['path']
             file_name = metadata['name']
+            caption = f'{file_name} (score : {distance:.2f})'
             
             img_bytes = s3.download_file(file_path)
             
@@ -73,16 +74,8 @@ def main() -> None:
                 st.image(
                     image=img_bytes,
                     width='stretch',
-                    caption=file_name
+                    caption=caption
                     )
-
-        st.subheader('Debug :')
-        my_results = {}
-        for metadata, distance in zip(dict(results)['metadatas'][0], dict(results)['distances'][0]):
-            name = metadata['name']
-            my_results[name] = distance
-
-        st.write(dict(my_results))
 
 if __name__ == '__main__':
     main()
