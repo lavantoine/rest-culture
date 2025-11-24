@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Mise à jour de la bibliothèque de construction d'interface Streamlit (1.22 -> 1.51).
 - Mise à jour de toutes les autres bibliothèques du projet.
+- Le système de mise en cache fonctionne désormais pour la connexion vers le bucket cloud.
 - Correction d'un oubli qui empêchait la sauvegarde des photographies déposées par l'utilisateur.
   
 ### Suppression

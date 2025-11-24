@@ -14,19 +14,27 @@ import io
 from io import BytesIO
 from s3 import S3
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def initialize_chroma() -> ChromaBase:
     chroma_base = ChromaBase()
     return chroma_base
 
-def main() -> None:
-    st.markdown("## Recherche inversée sur des images d'archive")
-    st.markdown("Cette application lancée par la M2RS permet d'effectuer une recherche inversée sur le fonds 209SUP (cartons 933 à 1044) du ministère de l'Europe et des Affaires étrangères (**23 391 photographies**).")
-    # with st.sidebar:
-    #     st.subheader('Accueil')
-    
+@st.cache_resource(show_spinner=False)
+def initialize_s3():
     s3 = S3()
-    chroma_base = initialize_chroma()
+    return s3
+
+def show_home_md():
+    with open('./md/home.md', 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    st.markdown(''.join(lines))
+
+def main() -> None:
+    with st.spinner('Chargement, merci de patienter...'):
+        s3 = initialize_s3()
+        chroma_base = initialize_chroma()
+        show_home_md()
     
     uploaded_image = st.file_uploader(label="Merci de déposer une image :", type=["jpg"])
     
@@ -41,6 +49,7 @@ def main() -> None:
                 img_pil.save(buffer, format="JPEG")
                 buffer.seek(0)   
             s3.upload_from_buffer_to_user(buffer, img_name)
+            st.toast(f"{img_name} sauvegardée.", icon=':material/save:')
         except:
             ...
         
