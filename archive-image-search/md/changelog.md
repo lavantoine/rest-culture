@@ -7,14 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.1] 2025-11-23
 
-### Ajout 
+### Ajouts
 
 - Ajout du système de pages multiples.
 - Ajout d'icônes Material Symbols (section pages & onglet de l'application).
 - Ajout de la page Nouveautés.
 - Ajout du score directement sous les résultats.
 
-### Changement
+### Changements
 
 - Mise à jour de la bibliothèque de construction d'interface Streamlit (1.22 -> 1.51).
 - Mise à jour de toutes les autres bibliothèques du projet.
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2025-11-19
 
-### Ajout
+### Ajouts
 
 - Ajout du fonds 209SUP complet (23 391 photographies).
 - Ajout d'une fonctionnalité de sauvegarde automatique des photographies déposées par l'utilisateur.
