@@ -1,11 +1,13 @@
+from pathlib import Path
 import streamlit as st
+
 
 CHANGELOG_LINES_TO_SKIP = 6  # header lines
 DISPLAY_LATEST = 1  # number or latest versions to display
 
 def show_changelog():
-    # suppose that ChangeLog.md is located at the same folder as Streamlit app
-    with open('./md/changelog.md', 'r', encoding='utf-8') as f:
+    md_path = Path(__file__).parent.parent / "md" / "changelog.md"
+    with open(md_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()[CHANGELOG_LINES_TO_SKIP:]
 
     # lines which contain version numbers only

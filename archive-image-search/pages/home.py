@@ -25,7 +25,8 @@ def initialize_s3():
     return s3
 
 def show_home_md():
-    with open('./md/home.md', 'r', encoding='utf-8') as f:
+    md_path = Path(__file__).parent.parent / "md" / "home.md"
+    with open(md_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
 
     st.markdown(''.join(lines))
@@ -40,7 +41,7 @@ def main() -> None:
     
     if uploaded_image is not None:
         img_bytes = uploaded_image.getvalue()
-        img_name = uploaded_image.name
+        img_name = uploaded_image.namee
         img_pil = Image.open(BytesIO(img_bytes)).convert("RGB")
         
         buffer = io.BytesIO()
