@@ -13,6 +13,15 @@ from PIL import Image
 import io
 from io import BytesIO
 from s3 import S3
+import requests
+
+BOT_TOKEN = st.secrets['TELEGRAM']['BOT_TOKEN']
+CHAT_ID = st.secrets['TELEGRAM']['CHAT_ID']
+
+def send_telegram(message: str):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    data = {"chat_id": CHAT_ID, "text": message}
+    requests.post(url, data=data)
 
 @st.cache_resource(show_spinner=False)
 def initialize_chroma() -> ChromaBase:
@@ -46,13 +55,33 @@ def main() -> None:
         
         buffer = io.BytesIO()
         try:
-            if '.jpg' in img_name:
-                img_pil.save(buffer, format="JPEG")
-                buffer.seek(0)   
-            s3.upload_from_buffer_to_user(buffer, img_name)
-            st.toast(f"{img_name} sauvegardée.", icon=':material/save:')
-        except:
-            ...
+            img_pil.save(buffer, format="JPEG")
+            buffer.seek(0)
+                
+            if buffer.getbuffer().nbytes == 0:
+                message = f'User upload error: empty buffer ({img_name}).'
+                send_telegram(message)
+                raise ValueError(message)
+            else:
+                img_path_str = f'user/{img_name}'
+                if s3.file_exists(img_path_str):
+                    st.toast(f"Le fichier {img_name} existe déjà. La sauvegarde a été ignorée.", icon=':material/skip_next:', duration='long')
+                else:
+                    s3.upload_from_buffer_to_user(buffer, img_name)
+                    try:
+                        downloaded_buffer = s3.download_file(Path("user") / img_name)
+                        downloaded_buffer.seek(0)
+                        Image.open(downloaded_buffer).verify()
+                        st.toast(f"Le fichier {img_name} a été sauvegardé.", icon=':material/save:', duration='long')
+                    except Exception as e:
+                        message = f'User upload error: image uploaded not valid: {e}.'
+                        send_telegram(message)
+                        raise ValueError(message)
+        except Exception as e:
+            message = f'User upload error: {e}.'
+            st.error(f"Erreur lors de la sauvegarde de {img_name}.")
+            send_telegram(message)
+            raise
         
         _, center, _ = st.columns((1,2,1))
         center.image(

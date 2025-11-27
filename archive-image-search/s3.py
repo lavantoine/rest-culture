@@ -73,9 +73,9 @@ class S3():
                 buffer.seek(0)
                 return buffer
     
-    def file_exists(self, filename):
+    def file_exists(self, file_path: str):
         try:
-            self.client.head_object(Bucket=self.bucket, Key=filename)
+            self.client.head_object(Bucket=self.bucket, Key=file_path)
             return True
         except ClientError as e:
                 if e.response['Error']['Code'] == "404":
@@ -127,9 +127,14 @@ class S3():
                 yield obj['Key']
                 
     def upload_from_buffer_to_user(self, buffer, file_name) -> None:
-        self.client.upload_fileobj(
-                buffer,
-                self.bucket,
-                f'user/{file_name}',
-                ExtraArgs={"ContentType": "image/jpeg"}
-        )
+        try:
+            self.client.upload_fileobj(
+                    buffer,
+                    self.bucket,
+                    file_path_str,
+                    ExtraArgs={"ContentType": "image/jpeg"}
+            )
+            logger.info(f'✅ user/{file_name} uploaded successfully.')
+        except Exception as e:
+            logger.error(f'❌ Error while uploading file to \"user/{file_name}\": {e}', exc_info=True)
+            raise
