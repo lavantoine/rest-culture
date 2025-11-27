@@ -80,7 +80,7 @@ def main() -> None:
         else:
             # Upload then verify uploaded version is a valid image file
             try:
-                s3.upload_from_buffer_to_user(buffer, img_name)
+                s3.upload_from_buffer_to_user(buffer, img_path_str)
                 downloaded_buffer = s3.download_file(Path("user") / img_name)
                 downloaded_buffer.seek(0)
                 Image.open(downloaded_buffer).verify()
@@ -119,6 +119,13 @@ def main() -> None:
             caption = f'{file_name} (score : {distance:.2f})'
             
             img_bytes = s3.download_file(file_path)
+            if not img_bytes:
+                error_img_path = Path(__file__).parent.parent / 'media/404.png'
+                with Image.open(error_img_path) as img:
+                    buffer = BytesIO()
+                    img.save(buffer, format="PNG")
+                    buffer.seek(0)
+                    img_bytes = buffer
             
             with cols[i % 3]:
                 st.image(

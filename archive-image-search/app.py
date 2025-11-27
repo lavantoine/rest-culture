@@ -11,7 +11,7 @@ def main() -> None:
     about_page = st.Page(
         'pages/changelog.py',
         title=f'Nouveautés ({version_number})',
-        icon=':material/diamond_shine:')
+        icon=':material/history_edu:')
     
     pg = st.navigation([home_page, about_page])
     st.set_page_config(page_title="Recherche inversée sur des images d'archive", page_icon=":material/image_search:")

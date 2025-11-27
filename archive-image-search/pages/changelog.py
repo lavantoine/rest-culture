@@ -16,7 +16,7 @@ def show_changelog():
     version_idx = lines.index(version_numbers[DISPLAY_LATEST])
     
     # display entries
-    st.header('Notes de publication')
+    st.header(':material/history_edu: Notes de publication')
     st.markdown(''.join(lines[:version_idx]))
     
     # hide others with expander

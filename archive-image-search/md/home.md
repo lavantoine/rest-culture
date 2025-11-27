@@ -1,2 +1,2 @@
-## Recherche inversée sur des images d'archive
+## :material/image_search: Recherche inversée sur des images d'archive
 Cette application lancée par la M2RS permet d'effectuer une recherche inversée sur le fonds 209SUP (cartons 933 à 1044) du ministère de l'Europe et des Affaires étrangères (**23 391 photographies**).

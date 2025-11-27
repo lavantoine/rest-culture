@@ -60,18 +60,13 @@ class S3():
     def download_file(self, file_path: Path) -> BytesIO:
         try:
             file_obj = BytesIO()
-            self.client.download_fileobj(self.bucket, file_path, file_obj)
+            self.client.download_fileobj(self.bucket, str(file_path), file_obj)
             file_obj.seek(0)
             logger.info(f'⬇️ {file_path} accessed')
             return file_obj
         except Exception as e:
-            logger.error(f'❌ Error while retrieving file \"{file_path}\": {e}', exc_info=True)
-            error_img_path = Path(__file__).parent / 'media/404.png'
-            with Image.open(error_img_path) as img:
-                buffer = BytesIO()
-                img.save(buffer, format="PNG")
-                buffer.seek(0)
-                return buffer
+            message = f'❌ Error while retrieving file \"{file_path}\": {e}'
+            raise Exception(message)
     
     def file_exists(self, file_path: str):
         try:
@@ -126,14 +121,14 @@ class S3():
             for obj in page.get("Contents", []):
                 yield obj['Key']
                 
-    def upload_from_buffer_to_user(self, buffer, file_name) -> None:
+    def upload_from_buffer_to_user(self, buffer, file_path: str) -> None:
         try:
             self.client.upload_fileobj(
                     buffer,
                     self.bucket,
-                    file_path_str,
+                    file_path,
                     ExtraArgs={"ContentType": "image/jpeg"}
             )
-            logger.info(f'✅ user/{file_name} uploaded successfully.')
-        except Exception:
-            raise Exception
+            logger.info(f'✅ {file_path} uploaded successfully.')
+        except Exception as e:
+            raise Exception(f'Error in s3.upload_from_buffer_to_user: {e}')
