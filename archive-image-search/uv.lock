@@ -169,6 +169,7 @@ dependencies = [
     { name = "st-files-connection" },
     { name = "standard-imghdr" },
     { name = "streamlit" },
+    { name = "streamlit-cropper" },
     { name = "torch" },
     { name = "tqdm" },
     { name = "transformers" },
@@ -183,6 +184,7 @@ requires-dist = [
     { name = "st-files-connection", specifier = ">=0.1.0" },
     { name = "standard-imghdr", specifier = ">=3.13.0" },
     { name = "streamlit", specifier = ">=1.51.0" },
+    { name = "streamlit-cropper", specifier = ">=0.3.1" },
     { name = "torch", specifier = ">=2.9.1" },
     { name = "tqdm", specifier = ">=4.67.1" },
     { name = "transformers", specifier = ">=4.57.1" },
@@ -2309,6 +2311,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/59/6d/327ddd5fc35fcf2aeecb4040668337f5565a1c6c95b1e892b8bfd4bb9031/streamlit-1.51.0.tar.gz", hash = "sha256:1e742a9c0b698f466c6f5bf58d333beda5a1fbe8de660743976791b5c1446ef6", size = 9742904, upload-time = "2025-10-29T17:07:39.082Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/39/60/868371b6482ccd9ef423c6f62650066cf8271fdb2ee84f192695ad6b7a96/streamlit-1.51.0-py3-none-any.whl", hash = "sha256:4008b029f71401ce54946bb09a6a3e36f4f7652cbb48db701224557738cfda38", size = 10171702, upload-time = "2025-10-29T17:07:35.97Z" },
+]
+
+[[package]]
+name = "streamlit-cropper"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "pillow" },
+    { name = "streamlit" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0f/74/d1729570d91b09b83fb05ed94ee7ff88e3e756ad27836639b69a12817875/streamlit_cropper-0.3.1.tar.gz", hash = "sha256:7d22befae2dd861ea9ac8ca65e1fa6c27af25e9350b365ee2d3d043d81ff76fe", size = 803477, upload-time = "2025-06-03T15:53:09.313Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/db/955b8d957acde8b61f7669f2f1ae4cab4e9bad44211a186a7c6558d45656/streamlit_cropper-0.3.1-py3-none-any.whl", hash = "sha256:26630e5366c9f0f8ed391d8bd7ab8386acf42cd9f30dd6e708b9b32beeef57e1", size = 810647, upload-time = "2025-06-03T15:53:07.798Z" },
 ]
 
 [[package]]
