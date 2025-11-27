@@ -1,3 +1,4 @@
+from utils import get_version_number
 import streamlit as st
 
 def main() -> None:
@@ -9,7 +10,7 @@ def main() -> None:
     
     about_page = st.Page(
         'pages/changelog.py',
-        title='Nouveautés',
+        title=f'Nouveautés ({version_number})',
         icon=':material/diamond_shine:')
     
     pg = st.navigation([home_page, about_page])
@@ -17,4 +18,5 @@ def main() -> None:
     pg.run()
 
 if __name__ == '__main__':
+    version_number = get_version_number()
     main()

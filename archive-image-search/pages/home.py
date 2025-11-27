@@ -41,48 +41,59 @@ def show_home_md():
     st.markdown(''.join(lines))
 
 def main() -> None:
+    # Instantiate s3 and chroma_db
     with st.spinner('Chargement, merci de patienter...'):
         s3 = initialize_s3()
         chroma_base = initialize_chroma()
         show_home_md()
     
+    # Streamlit file_uploaded as input for image
     uploaded_image = st.file_uploader(label="Merci de déposer une image :", type=["jpg"])
     
     if uploaded_image is not None:
-        img_bytes = uploaded_image.getvalue()
-        img_name = uploaded_image.name
-        img_pil = Image.open(BytesIO(img_bytes)).convert("RGB")
-        
-        buffer = io.BytesIO()
+        # Fill buffer with image data
         try:
+            img_bytes = uploaded_image.getvalue()
+            img_name = uploaded_image.name
+            img_pil = Image.open(BytesIO(img_bytes)).convert("RGB")
+            buffer = io.BytesIO()
             img_pil.save(buffer, format="JPEG")
             buffer.seek(0)
-                
-            if buffer.getbuffer().nbytes == 0:
-                message = f'User upload error: empty buffer ({img_name}).'
+        except Exception as e:
+            message = f'Error while loading image locally: {e}.'
+            send_telegram(message)
+            raise ValueError(message)
+        
+        # Raise if buffer is empty
+        if buffer.getbuffer().nbytes == 0:
+            message = f'User upload error: empty buffer ({img_name}).'
+            send_telegram(message)
+            raise ValueError(message)
+        
+        # Upload to s3
+        img_path_str = f'user/{img_name}'
+        if s3.file_exists(img_path_str):
+            st.toast(
+                f"Le fichier {img_name} existe déjà. La sauvegarde a été ignorée.",
+                icon=':material/skip_next:',
+                duration='long')
+        else:
+            # Upload then verify uploaded version is a valid image file
+            try:
+                s3.upload_from_buffer_to_user(buffer, img_name)
+                downloaded_buffer = s3.download_file(Path("user") / img_name)
+                downloaded_buffer.seek(0)
+                Image.open(downloaded_buffer).verify()
+                st.toast(
+                    f"Le fichier {img_name} a été sauvegardé.",
+                    icon=':material/save:',
+                    duration='long')
+            except Exception as e:
+                message = f'User upload error: {e}.'
                 send_telegram(message)
                 raise ValueError(message)
-            else:
-                img_path_str = f'user/{img_name}'
-                if s3.file_exists(img_path_str):
-                    st.toast(f"Le fichier {img_name} existe déjà. La sauvegarde a été ignorée.", icon=':material/skip_next:', duration='long')
-                else:
-                    s3.upload_from_buffer_to_user(buffer, img_name)
-                    try:
-                        downloaded_buffer = s3.download_file(Path("user") / img_name)
-                        downloaded_buffer.seek(0)
-                        Image.open(downloaded_buffer).verify()
-                        st.toast(f"Le fichier {img_name} a été sauvegardé.", icon=':material/save:', duration='long')
-                    except Exception as e:
-                        message = f'User upload error: image uploaded not valid: {e}.'
-                        send_telegram(message)
-                        raise ValueError(message)
-        except Exception as e:
-            message = f'User upload error: {e}.'
-            st.error(f"Erreur lors de la sauvegarde de {img_name}.")
-            send_telegram(message)
-            raise
         
+        # Layout for displaying image
         _, center, _ = st.columns((1,2,1))
         center.image(
             image=img_bytes,

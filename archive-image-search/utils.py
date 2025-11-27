@@ -5,6 +5,17 @@ from tqdm import tqdm
 import streamlit as st
 import torch
 import logging
+import re
+
+def get_version_number():
+    md_path = Path(__file__).parent / "md" / "changelog.md"
+    with open(md_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()[7:]
+    
+    # version_numbers = [line for line in lines if line.startswith('## [')]
+    match = re.search(r"\[([^\]]*)\]", lines[0])
+    version_number = match.group(1)
+    return version_number
 
 def get_logger(name=__name__) -> logging.Logger:
     logging.basicConfig(

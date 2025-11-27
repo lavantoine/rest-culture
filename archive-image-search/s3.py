@@ -135,6 +135,5 @@ class S3():
                     ExtraArgs={"ContentType": "image/jpeg"}
             )
             logger.info(f'✅ user/{file_name} uploaded successfully.')
-        except Exception as e:
-            logger.error(f'❌ Error while uploading file to \"user/{file_name}\": {e}', exc_info=True)
-            raise
+        except Exception:
+            raise Exception
